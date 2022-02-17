@@ -89,7 +89,7 @@ def check_script_work(dict_list: list):
 
 if __name__ == '__main__':
     # end_data = datetime.datetime.strptime(str_date, '%Y-%m-%dT%H:%M:%S.%f')
-    # Путь к файлу конфигурации
+    # Путь к файлу конфигурации, находится в каталоге со скриптом
     config_path = os.path.join(os.getcwd(), 'setting.ini')
     # получаем данные для подключения к серверу
     srv_connect_data = get_config(config_path, 'ROOMY_API_DATA')
