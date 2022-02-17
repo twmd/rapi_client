@@ -9,7 +9,7 @@ logger.info('Модуль запустился')
 class ApiClientBase:
     '''Базовый класс подключения к API'''
     #TODO: добавить сохранение токена и проверку?
-    def __init__(self, server: str, username: str, password: str):
+    def __init__(self, server: str, username='', password=''):
         self.server = server
         self.username = username
         self.password = password
@@ -25,6 +25,7 @@ class ApiClientBase:
         '''
         headers = {"Content-Type": "application/json", 'Authorization': 'Bearer {}'.format(self.access_token)}
         try:
+            #TODO: добавить проверку на код ответа
             resp = requests.get(self.server + uri + address_ext, headers=headers, params=params)
         except Exception as e:
             logger.exception(f'Ошибка метода get к серверу {self.server}')
@@ -42,6 +43,7 @@ class ApiClientBase:
         '''
         headers = {"Content-Type": "application/json", 'Authorization': 'Bearer {}'.format(self.access_token)}
         try:
+            #TODO: добавить проверку на код ответа
             resp = requests.post(self.server + uri + address_ext, headers=headers, data=data)
         except Exception as e:
             logger.exception(f'Ошибка метода post к серверу {self.server}')
