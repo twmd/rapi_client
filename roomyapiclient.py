@@ -2,7 +2,7 @@ import os
 import ast
 import datetime
 from lib.apiclient import ApiClientBase
-from lib.common import get_config, send_email
+from lib.common import get_config, send_email, get_logger
 
 
 # Наследуемся от базового класса, получаем доступ к его методам и делам что хотим
@@ -31,6 +31,7 @@ class RoomyScript(ApiClientBase):
         for item in data:
             if item['name'] in self.scripts_name:
                 script_id.update({item['name']: item['id']})
+        logger.info('UID скриптов получен')
         return script_id
 
     @staticmethod
@@ -51,7 +52,7 @@ class RoomyScript(ApiClientBase):
             try:
                 data_dict.update({key: data[key]})
             except Exception as e:
-                print(e)
+                logger.exception('Функция filter ошибка')
         return data_dict
 
     def get_script_run_status(self, keys=None):
@@ -69,16 +70,18 @@ class RoomyScript(ApiClientBase):
                     #Получаем последний объект списка
                     data = self.api_get(uri=self.run_info_uri['get_script_history'], params='scriptId=' + v)[-1]
                 except Exception as e:
-                    print(e)
+                    logger.exception('Получение данныех с сервера')
                 else:
+                    logger.info('Данные с сервера о статусе скрипта получены')
                     data_list.append(self.keys(data=data, name=k, keys=keys))
         else:
             for k, v in scripts_id.items():
                 try:
                     data = self.api_get(uri=self.run_info_uri['get_script_history'], params='scriptId=' + v)[-1]
                 except Exception as e:
-                    print(e)
+                    logger.exception('Получение данныех с сервера')
                 else:
+                    logger.info('Данные с сервера о статусе скрипта получены')
                     data_list.append(data)
         return data_list
 
@@ -109,6 +112,9 @@ def check_script_work(dict_list: list):
 
 
 if __name__ == '__main__':
+    logger = get_logger()
+    logger.info('Скрипт запустился')
+
     # end_data = datetime.datetime.strptime(str_date, '%Y-%m-%dT%H:%M:%S.%f')
     # Путь к файлу конфигурации, находится в каталоге со скриптом
     config_path = os.path.join(os.getcwd(), 'setting.ini')
@@ -130,3 +136,4 @@ if __name__ == '__main__':
     body, subject = check_script_work(script_run_list)
     #Шлем email
     send_email(mail_setting=mail_setting, body=body, subject=subject)
+    logger.info('Скрипт закончил работу')

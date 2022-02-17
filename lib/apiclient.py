@@ -1,8 +1,10 @@
-#TODO добавить исключения
 import json
 import requests
 import datetime
+from .common import get_logger
 
+logger = get_logger()
+logger.info('Модуль запустился')
 
 class ApiClientBase:
     '''Базовый класс подключения к API'''
@@ -12,7 +14,7 @@ class ApiClientBase:
         self.username = username
         self.password = password
         self.access_token = ''
-
+        logger.info('Класс ApiClientBase инициализировав')
     def api_get(self, uri='', address_ext='', params=''):
         '''
         Метод get
@@ -25,8 +27,9 @@ class ApiClientBase:
         try:
             resp = requests.get(self.server + uri + address_ext, headers=headers, params=params)
         except Exception as e:
-            print(e)
+            logger.exception(f'Ошибка метода get к серверу {self.server}')
         else:
+            logger.info('api_get отработала')
             return resp.json()
 
     def api_post(self, uri='', data='', address_ext=''):
@@ -41,8 +44,9 @@ class ApiClientBase:
         try:
             resp = requests.post(self.server + uri + address_ext, headers=headers, data=data)
         except Exception as e:
-            print(e)
+            logger.exception(f'Ошибка метода post к серверу {self.server}')
         else:
+            logger.info('api_post отработала')
             return resp.json()
 
     def auth(self, auth_url):
@@ -54,9 +58,14 @@ class ApiClientBase:
             "authLocateData": str(datetime.datetime.now())
         }
         json_auth_data = json.dumps(auth_data)
-        data = self.api_post(uri=auth_url, data=json_auth_data)
-        self.access_token = data['accessToken']
-        return self.access_token
+        try:
+            data = self.api_post(uri=auth_url, data=json_auth_data)
+        except Exception as e:
+            logger.exception('Функция auth')
+        else:
+            logger.info('accessToken получен')
+            self.access_token = data['accessToken']
+            return self.access_token
 
 
 if __name__ == '__main__':
