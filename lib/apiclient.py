@@ -14,7 +14,7 @@ class ApiClientBase:
         self.username = username
         self.password = password
         self.access_token = ''
-        logger.info('Класс ApiClientBase инициализировав')
+        logger.info('Класс ApiClientBase инициализирован')
     def api_get(self, uri='', address_ext='', params=''):
         '''
         Метод get
@@ -63,10 +63,12 @@ class ApiClientBase:
         except Exception as e:
             logger.exception('Функция auth')
         else:
-            logger.info('accessToken получен')
-            self.access_token = data['accessToken']
-            return self.access_token
-
+            try:
+                self.access_token = data['accessToken']
+            except Exception as e:
+                logger.exception('Ошибка чтения AccessToken из данных')
+            else:
+                logger.info('accessToken получен')
 
 if __name__ == '__main__':
     pass
