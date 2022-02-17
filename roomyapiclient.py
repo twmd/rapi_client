@@ -1,3 +1,4 @@
+import configparser
 import os
 import ast
 import datetime
@@ -7,7 +8,7 @@ from lib.common import get_config, send_email, get_logger
 
 # Наследуемся от базового класса, получаем доступ к его методам и делам что хотим
 class RoomyScript(ApiClientBase):
-    #Создаем словари/словарь как удобнее с нужными uri для работы
+    # Создаем словари/словарь как удобнее с нужными uri для работы
     script_uri = {
         'get_scripts': r'/api/Script/GetScripts'
     }
@@ -67,7 +68,7 @@ class RoomyScript(ApiClientBase):
             # TODO: добавить exception
             for k, v in scripts_id.items():
                 try:
-                    #Получаем последний объект списка
+                    # Получаем последний объект списка
                     data = self.api_get(uri=self.run_info_uri['get_script_history'], params='scriptId=' + v)[-1]
                 except Exception as e:
                     logger.exception('Получение данныех с сервера')
@@ -101,7 +102,7 @@ def check_script_work(dict_list: list):
     subject = ''
     for data in dict_list:
         if data['result'] == 0:
-            #TODO переписать на форматированные строки, режит глаза
+            # TODO переписать на форматированные строки, режит глаза
             body = body + data['name'] + ' выполнился успешно: ' + data['endDate'].split('.')[0] + '\n'
             subject = 'Все роботы отработали'
         else:
@@ -118,22 +119,25 @@ if __name__ == '__main__':
     # end_data = datetime.datetime.strptime(str_date, '%Y-%m-%dT%H:%M:%S.%f')
     # Путь к файлу конфигурации, находится в каталоге со скриптом
     config_path = os.path.join(os.getcwd(), 'setting.ini')
-    # получаем данные для подключения к серверу
-    srv_connect_data = get_config(config_path, 'ROOMY_API_DATA')
-    tmp_scripts_data = get_config(config_path, 'SCRIPT_DATA')
-    # Список скриптов для мониторинга
-    scripts = ast.literal_eval(tmp_scripts_data['script_list'])
-    mail_setting = get_config(config_path, 'MAIL')
-    #Создаем экземляр класа
-    r_script = RoomyScript(server=srv_connect_data['roomy_api_path'], username=srv_connect_data['roomy_api_user'],
-                           password=srv_connect_data['roomy_api_password'], scripts_name=scripts)
-    #Вызываем аутентефикацию
-    r_script.auth(auth_url='/api/Authorization/Authorize')
-
-    # Получаем словарь с именем скриптов и их id
-    script_run_list = r_script.get_script_run_status(keys=['endDate', 'result', 'name'])
-    #Проверяем статусы выполнения
-    body, subject = check_script_work(script_run_list)
-    #Шлем email
-    send_email(mail_setting=mail_setting, body=body, subject=subject)
-    logger.info('Скрипт закончил работу')
+    try:
+        # получаем данные для подключения к серверу
+        srv_connect_data = get_config(config_path, 'ROOMY_API_DATA')
+        tmp_scripts_data = get_config(config_path, 'SCRIPT_DATA')
+        # Список скриптов для мониторинга
+        mail_setting = get_config(config_path, 'MAIL')
+    except configparser.NoSectionError as e:
+        logger.exception('Ошибка чтения файла конфигурации')
+    else:
+        scripts = ast.literal_eval(tmp_scripts_data['script_list'])
+        # Создаем экземляр класа
+        r_script = RoomyScript(server=srv_connect_data['roomy_api_path'], username=srv_connect_data['roomy_api_user'],
+                               password=srv_connect_data['roomy_api_password'], scripts_name=scripts)
+        # Вызываем аутентефикацию
+        r_script.auth(auth_url='/api/Authorization/Authorize')
+        # Получаем словарь с именем скриптов и их id
+        script_run_list = r_script.get_script_run_status(keys=['endDate', 'result', 'name'])
+        # Проверяем статусы выполнения
+        body, subject = check_script_work(script_run_list)
+        # Шлем email
+        send_email(mail_setting=mail_setting, body=body, subject=subject)
+        logger.info('Скрипт закончил работу')
