@@ -6,18 +6,12 @@ import datetime
 
 class ApiClientBase:
     '''Базовый класс подключения к API'''
-    # __slots__ = 'server', 'username', 'password', 'access_token'
-    # TODO: может имеет смысл вынести как схему json. Что бы не загромождать код
-    authorization_uri = {
-        'login_uri': r'/api/Authorization/Authorize',
-    }
     #TODO: добавить сохранение токена и проверку?
     def __init__(self, server: str, username: str, password: str):
         self.server = server
         self.username = username
         self.password = password
         self.access_token = ''
-        self.auth()
 
     def api_get(self, uri='', address_ext='', params=''):
         '''
@@ -51,7 +45,7 @@ class ApiClientBase:
         else:
             return resp.json()
 
-    def auth(self):
+    def auth(self, auth_url):
         # TODO: Если будет потребность доделать что бы работали с access токеном (обновление)
         '''Аутентификация на сервере'''
         auth_data = {
@@ -60,7 +54,7 @@ class ApiClientBase:
             "authLocateData": str(datetime.datetime.now())
         }
         json_auth_data = json.dumps(auth_data)
-        data = self.api_post(uri=self.authorization_uri['login_uri'], data=json_auth_data)
+        data = self.api_post(uri=auth_url, data=json_auth_data)
         self.access_token = data['accessToken']
         return self.access_token
 

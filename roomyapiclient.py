@@ -5,7 +5,9 @@ from lib.apiclient import ApiClientBase
 from lib.common import get_config, send_email
 
 
+# Наследуемся от базового класса, получаем доступ к его методам и делам что хотим
 class RoomyScript(ApiClientBase):
+    #Создаем словари/словарь как удобнее с нужными uri для работы
     script_uri = {
         'get_scripts': r'/api/Script/GetScripts'
     }
@@ -33,32 +35,51 @@ class RoomyScript(ApiClientBase):
 
     @staticmethod
     def keys(data: dict, name: str, keys: list):
+        '''
+        Выбираем ключи которые нам необходимо вернуть
+        :param data: Словарь для парсинга
+        :param name: Имя робота
+        :param keys: Ключи которые необходимо вернуть
+        :return:
+        '''
         data_dict = {}
         data_dict.update({'name': name})
         # Удаляем ключ name что бы не задублировался
         if 'name' in keys:
             keys.remove('name')
         for key in keys:
-            data_dict.update({key: data[key]})
+            try:
+                data_dict.update({key: data[key]})
+            except Exception as e:
+                print(e)
         return data_dict
 
     def get_script_run_status(self, keys=None):
         '''
         Получаем json со статусами по скриптам
-        :return: Списко с json
+        :param keys: Ключи для фильтрации
+        :return:
         '''
         scripts_id = self._get_scripts_id()
         data_list = []
         if keys:
             # TODO: добавить exception
             for k, v in scripts_id.items():
-                data = self.api_get(uri=self.run_info_uri['get_script_history'], params='scriptId=' + v)[-1]
-                data_list.append(self.keys(data=data, name=k, keys=keys))
+                try:
+                    #Получаем последний объект списка
+                    data = self.api_get(uri=self.run_info_uri['get_script_history'], params='scriptId=' + v)[-1]
+                except Exception as e:
+                    print(e)
+                else:
+                    data_list.append(self.keys(data=data, name=k, keys=keys))
         else:
             for k, v in scripts_id.items():
-                data = self.api_get(uri=self.run_info_uri['get_script_history'], params='scriptId=' + v)[-1]
-                # data_list.append(self.keys(data, k))
-                data_list.append(data)
+                try:
+                    data = self.api_get(uri=self.run_info_uri['get_script_history'], params='scriptId=' + v)[-1]
+                except Exception as e:
+                    print(e)
+                else:
+                    data_list.append(data)
         return data_list
 
 
@@ -100,7 +121,11 @@ if __name__ == '__main__':
 
     r_script = RoomyScript(server=srv_connect_data['roomy_api_path'], username=srv_connect_data['roomy_api_user'],
                            password=srv_connect_data['roomy_api_password'], scripts_name=scripts)
+    #Вызываем аутентефикацию
+    r_script.auth(auth_url='/api/Authorization/Authorize')
     # Получаем словарь с именем скриптов и их id
     script_run_list = r_script.get_script_run_status(keys=['endDate', 'result', 'name'])
+    #Проверяем статусы выполнения
     body, subject = check_script_work(script_run_list)
+    #Шлем email
     send_email(mail_setting=mail_setting, body=body, subject=subject)

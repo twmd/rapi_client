@@ -18,19 +18,23 @@ def get_config(config_path: str, section: str) -> dict:
 
 def send_email(mail_setting, body, subject):
     '''Посылаем email'''
-    # try:
-    #Переводим список в строку
-    mail_to_tmp = ast.literal_eval(mail_setting['to'])
-    mail_to = ', '.join(mail_to_tmp)
-    message = MIMEMultipart()
-    message["From"] = mail_setting['from']
-    message['To'] = mail_to
-    message['Subject'] = subject
-    message.attach(MIMEText(body, 'plain'))
-    smtp_obj = smtplib.SMTP(mail_setting['server'], int(mail_setting['port']))
-    smtp_obj.starttls()
-    smtp_obj.login(mail_setting['username'], mail_setting['password'])
-    smtp_obj.sendmail(from_addr=mail_setting['from'], to_addrs=mail_to, msg=message.as_string())
-    smtp_obj.quit()
-    # except Exception as e:
-    #     print(str(e) + ' !!!!exception')
+    try:
+        #Переводим список в строку
+        mail_to_tmp = ast.literal_eval(mail_setting['to'])
+        mail_to = ', '.join(mail_to_tmp)
+        message = MIMEMultipart()
+        message["From"] = mail_setting['from']
+        message['To'] = mail_to
+        message['Subject'] = subject
+        message.attach(MIMEText(body, 'plain'))
+        smtp_obj = smtplib.SMTP(mail_setting['server'], int(mail_setting['port']))
+        smtp_obj.starttls()
+        smtp_obj.login(mail_setting['username'], mail_setting['password'])
+        smtp_obj.sendmail(from_addr=mail_setting['from'], to_addrs=mail_to, msg=message.as_string())
+        smtp_obj.quit()
+    except Exception as e:
+        print(str(e) + ' !!!!exception')
+
+
+if __name__ == '__main__':
+    pass
