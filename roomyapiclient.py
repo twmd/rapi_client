@@ -115,14 +115,15 @@ if __name__ == '__main__':
     # получаем данные для подключения к серверу
     srv_connect_data = get_config(config_path, 'ROOMY_API_DATA')
     tmp_scripts_data = get_config(config_path, 'SCRIPT_DATA')
-    mail_setting = get_config(config_path, 'MAIL')
     # Список скриптов для мониторинга
     scripts = ast.literal_eval(tmp_scripts_data['script_list'])
-
+    mail_setting = get_config(config_path, 'MAIL')
+    #Создаем экземляр класа
     r_script = RoomyScript(server=srv_connect_data['roomy_api_path'], username=srv_connect_data['roomy_api_user'],
                            password=srv_connect_data['roomy_api_password'], scripts_name=scripts)
     #Вызываем аутентефикацию
     r_script.auth(auth_url='/api/Authorization/Authorize')
+
     # Получаем словарь с именем скриптов и их id
     script_run_list = r_script.get_script_run_status(keys=['endDate', 'result', 'name'])
     #Проверяем статусы выполнения
