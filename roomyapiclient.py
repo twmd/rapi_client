@@ -4,7 +4,7 @@ import ast
 import datetime
 from lib.apiclient import ApiClientBase
 from lib.common import get_config, send_email, get_logger
-
+import sys
 
 # Наследуемся от базового класса, получаем доступ к его методам и делам что хотим
 class RoomyScript(ApiClientBase):
@@ -54,6 +54,7 @@ class RoomyScript(ApiClientBase):
                 data_dict.update({key: data[key]})
             except Exception as e:
                 logger.exception('Функция filter ошибка')
+                sys.exit(1)
         return data_dict
 
     def get_script_run_status(self, keys=None):
@@ -72,6 +73,7 @@ class RoomyScript(ApiClientBase):
                     data = self.api_get(uri=self.run_info_uri['get_script_history'], params='scriptId=' + v)[-1]
                 except Exception as e:
                     logger.exception('Получение данныех с сервера')
+                    sys.exit(1)
                 else:
                     logger.info('Данные с сервера о статусе скрипта получены')
                     data_list.append(self.keys(data=data, name=k, keys=keys))
@@ -81,6 +83,7 @@ class RoomyScript(ApiClientBase):
                     data = self.api_get(uri=self.run_info_uri['get_script_history'], params='scriptId=' + v)[-1]
                 except Exception as e:
                     logger.exception('Получение данныех с сервера')
+                    sys.exit(1)
                 else:
                     logger.info('Данные с сервера о статусе скрипта получены')
                     data_list.append(data)
@@ -127,6 +130,7 @@ if __name__ == '__main__':
         mail_setting = get_config(config_path, 'MAIL')
     except configparser.NoSectionError as e:
         logger.exception('Ошибка чтения файла конфигурации')
+        sys.exit(1)
     else:
         scripts = ast.literal_eval(tmp_scripts_data['script_list'])
         # Создаем экземляр класа

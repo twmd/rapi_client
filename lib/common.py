@@ -7,7 +7,7 @@ from email.mime.multipart import MIMEMultipart
 import ast
 import logging
 import logging.config
-
+import sys
 def get_logger():
     # Логер
     logging.config.fileConfig(os.path.join(os.getcwd(), 'logger.conf'), disable_existing_loggers = False)
@@ -49,6 +49,7 @@ def send_email(mail_setting, body, subject):
         logger.info(f'Почта отправлена {mail_to} ')
     except Exception as e:
         logger.exception('Ошибка отправки почты')
+        sys.exit(1)
 
 if __name__ == '__main__':
     pass
