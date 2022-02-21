@@ -1,4 +1,5 @@
-# TODO добавить исключения
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import configparser
 import os.path
 import smtplib
