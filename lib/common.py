@@ -43,8 +43,8 @@ def send_email(mail_setting, body, subject):
     message.attach(MIMEText(body, 'plain'))
     try:
         smtp_obj = smtplib.SMTP(mail_setting['server'], int(mail_setting['port']))
-        smtp_obj.starttls()
-        smtp_obj.login(mail_setting['username'], mail_setting['password'])
+        # smtp_obj.starttls()
+        # smtp_obj.login(mail_setting['username'], mail_setting['password'])
         smtp_obj.sendmail(from_addr=mail_setting['from'], to_addrs=mail_to, msg=message.as_string())
         smtp_obj.quit()
         logger.info(f'Почта отправлена {mail_to} ')
